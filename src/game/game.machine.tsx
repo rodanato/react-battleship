@@ -47,11 +47,7 @@ export type GameEvent =
   | { type: "GO_TO_EASY" }
   | { type: "GO_TO_MEDIUM" }
   | { type: "GO_TO_HARD" }
-  | { type: "ADD_MISSED_SHOT" }
-  | { type: "ADD_SHOT" }
-  | { type: "REMOVE_SHOT" }
   | { type: "SAVE_HIT" }
-  | { type: "SAVE_HIT_ON_SHIP" }
   | { type: "FINISH" };
 
 const initialContext: GameContext = {
@@ -227,16 +223,13 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
       entry: ["setShipsRandomly"],
       on: { 
         FINISH: 'finished' ,
-        ADD_MISSED_SHOT: {
-          actions: ['saveMissedShot']
-        },
         SAVE_HIT: {
           actions: [
             'removeShot',
             'saveHit',
             'saveMissedShot', 
             'saveHitOnShip',
-            'shipHasBeenSinked'
+            'saveSinked',
           ]
         },
       },
@@ -245,11 +238,11 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
       entry: [
         'saveScore',
         'finishGame',
-        // 'cleanBoard'
+        'cleanBoard'
       ],
-      // after: {
-      //   3000: { target: 'not_started' }
-      // }
+      after: {
+        1000: { target: 'not_started' }
+      },
     }
   }
 }, {
@@ -262,18 +255,22 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
       ctx.ships = [];
       ctx.sinkedPositions = [];
     },
-    shipHasBeenSinked: (ctx, e: any) => {
-      const sinked = ctx.ships.some(
-        (ship: Ship) => ship.size === ship.hitCount && ship.position.includes(e.position)
-      );
+    saveSinked: (ctx, e: any) => {
+      ctx.ships.forEach(ship => {
+        if (ship.size === ship.hitCount) {
+          if (ship.positionsList.includes(e.position) && !ctx.sinkedPositions.includes(e.position)) {
+            toast('Ship sinked!', {
+              icon: '👏',
+            });
+          }
 
-      if (sinked) {
-        toast('Ship sinked!', {
-          icon: '👏',
-        });
-      }
-
-      console.log('>>> ctx', ctx)
+          // @ts-ignore
+          ctx.sinkedPositions = [...new Set([
+            ...ctx.sinkedPositions,
+            ...ship.positionsList,
+          ])];
+        }        
+      });
     },
     saveHitOnShip: (ctx, e: any) => {
       const ships = ctx.ships.map((ship: Ship) => ({
@@ -282,16 +279,6 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
           ? ship.hitCount + 1
           : ship.hitCount 
       }));
-
-      ships.forEach(ship => {
-        if (ship.size === ship.hitCount) {
-          // @ts-ignore
-          ctx.sinkedPositions = [...new Set([
-            ...ctx.sinkedPositions,
-            ...ship.positionsList,
-          ])];
-        }        
-      });
 
       ctx.ships = ships;
     },
@@ -322,7 +309,7 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
       ]
     },
     finishGame: (ctx, e: any) => {
-      toast('Game over, you ' + e.msg, {
+      toast('Juego terminado, ' + e.msg, {
         icon: '✌️',
       });
     },
@@ -341,7 +328,7 @@ const gameMachine = createMachine<GameContext, GameEvent, GameState>({
     },
     setMode: (ctx: any, e: any) => {
       ctx.shots = ctx.mode[e.mode || "easy"];
-      toast.success(capitalize(e.mode || "easy") + ' mode selected')
+      toast.success('Dificultad: ' + capitalize(e.mode || "easy"))
     },
     setShips: (ctx, e: any) => {
       const ships: Ship[] = getShips(ctx.settings.shipTypes);

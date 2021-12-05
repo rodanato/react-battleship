@@ -94,3 +94,7 @@ html {
   width: 15px;
   text-align: center;
 }
+
+nav a {
+  display: block;
+}

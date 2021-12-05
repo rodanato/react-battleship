@@ -17,7 +17,8 @@ export function Game() {
     ships,
     sinkedPositions,
     rows,
-    columns
+    columns,
+    scores
   } = state.context;
   
   const allShipsHaveBeenRemoved = () => ships.every((ship: Ship) => ship.size === ship.hitCount);
@@ -37,34 +38,31 @@ export function Game() {
     }
   }
 
-  function getMode(shots: number) {
-    for (let mode in state.context.mode) {
-      if (state.context.mode[mode] === shots) {
-        return capitalize(mode);
-      }
-    }
-
-    return 'Easy';
-  }
-
   useEffect(() => {
-    if (allShipsHaveBeenRemoved()) finishGame('won');
+    if (allShipsHaveBeenRemoved()) finishGame('ganaste');
   }, [ships]);
 
   useEffect(() => {
-    if (shots === 0) finishGame('lost');
+    if (shots === 0) finishGame('perdiste');
   }, [shots]);
 
   return (
     <div>
-      <h2>Game {state.matches('started') ? 'started': 'not started'}</h2>
+      <h2>Juego {state.matches('started') ? 'iniciado': 'no iniciado'}</h2>
 
-      <h3>Difficulty: {getMode(shots)}</h3>
-      <h3>Shots left: {shots}</h3>
+      <h3>Disparos restantes: {shots}</h3>
 
       {
-        state.matches('not_started') &&
-        <button onClick={() => send('START')}>Start game</button>
+        state.matches('not_started') && scores.length === 0 &&
+        <button onClick={() => send('START')}>
+          Iniciar juego
+        </button>
+      }  
+      {
+        state.matches('not_started') && scores.length > 0 &&
+        <button onClick={() => send('START')}>
+          Intentar de nuevo 
+        </button>
       }  
  
       <main>
