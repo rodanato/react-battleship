@@ -95,7 +95,6 @@ function Scores() {
           </ul>
         ))
       }
-
     </div>
   );
 }

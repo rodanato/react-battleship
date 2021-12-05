@@ -1,11 +1,9 @@
 import { useActor } from '@xstate/react';
 import React, { useContext, useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { GameMachineContext } from './game.machine';
 
 import Grid from './grid';
 import { Ship } from './types';
-import { capitalize } from './utils';
 
 export function Game() {
   const GameMachineService = useContext(GameMachineContext);
@@ -59,16 +57,14 @@ export function Game() {
         </button>
       }  
  
-      <main>
-        <Grid
-          rows={rows}
-          columns={columns}
-          hits={hits}
-          missedShots={missedShots}
-          sinkedPositions={sinkedPositions}
-          shotAction={shotAction}
-        />
-      </main>
+      <Grid
+        rows={rows}
+        columns={columns}
+        hits={hits}
+        missedShots={missedShots}
+        sinkedPositions={sinkedPositions}
+        shotAction={shotAction}
+      />
     </div>
   );
 }
