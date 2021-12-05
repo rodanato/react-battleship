@@ -53,15 +53,9 @@ export function Game() {
       <h3>Disparos restantes: {shots}</h3>
 
       {
-        state.matches('not_started') && scores.length === 0 &&
+        state.matches('not_started') &&
         <button onClick={() => send('START')}>
-          Iniciar juego
-        </button>
-      }  
-      {
-        state.matches('not_started') && scores.length > 0 &&
-        <button onClick={() => send('START')}>
-          Intentar de nuevo 
+          {scores.length > 0 ? 'Intentar de nuevo' : 'Iniciar juego'} 
         </button>
       }  
  
